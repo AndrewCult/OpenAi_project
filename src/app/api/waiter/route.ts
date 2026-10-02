@@ -3,12 +3,9 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(request: Request) {
   try {
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const { session } = await request.json();
     const newSession = await switchWaiterState(session);
 
@@ -17,7 +14,7 @@ export async function POST(request: Request) {
     console.log("Next Step:", newSession.step);
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messages: newSession.history as ChatCompletionMessageParam[],
     });
 
@@ -31,7 +28,7 @@ export async function POST(request: Request) {
     console.error("Error generating AI response:", error);
     return NextResponse.json(
       { error: "Error generating AI response" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

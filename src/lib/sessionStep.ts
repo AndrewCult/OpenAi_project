@@ -3,7 +3,7 @@ import { Session } from "./switchWaiterState";
 
 export default async function sessionStep(
   session: Session | CookSession,
-  url: string
+  url: string,
 ) {
   const res = await fetch(url, {
     method: "POST",
@@ -11,6 +11,11 @@ export default async function sessionStep(
     body: JSON.stringify({ session }),
   });
 
-  const newSession = await res.json();
-  return newSession;
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok || !data || !Array.isArray(data.history)) {
+    throw new Error(data?.error ?? `Request to ${url} failed (${res.status})`);
+  }
+
+  return data;
 }

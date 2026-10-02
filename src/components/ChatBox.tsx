@@ -21,11 +21,11 @@ import InputChatBox from "@/components/InputChatBox";
 export default function ChatBox() {
   // useState management -> WaiterSession, CookSession, recipe, cookChat, ChatHistory and isSending(user message sending)
   const [waiterSession, setWaiterSession] = useState<Session>(
-    getInitialWaiterValue()
+    getInitialWaiterValue(),
   );
   const { sessionInit, error } = useInitSession(waiterSession, "api/waiter");
   const [cookSession, setCookSession] = useState<CookSession>(
-    getInitialCookValue("", "")
+    getInitialCookValue("", ""),
   );
   const [recipe, setRecipe] = useState("");
   const [cookChat, setCookChat] = useState(false);
@@ -46,7 +46,7 @@ export default function ChatBox() {
         returnedSession = await sendWaiterMessage(
           input,
           waiterSession,
-          setWaiterSession
+          setWaiterSession,
         );
 
         if (returnedSession != null) {
@@ -59,7 +59,7 @@ export default function ChatBox() {
         returnedSession = await sendCookMessage(
           input,
           cookSession,
-          setCookSession
+          setCookSession,
         );
 
         if (returnedSession != null) {
@@ -69,6 +69,13 @@ export default function ChatBox() {
           });
         }
       }
+    } catch (err) {
+      console.error(err);
+      addHistoryMessage({
+        role: "assistant",
+        content:
+          "Something went wrong talking to the server. Please try again.",
+      });
     } finally {
       setIsSending(false);
     }
@@ -103,6 +110,13 @@ export default function ChatBox() {
       setWaiterSession(sessionInit);
       addHistoryMessage(sessionInit.history[sessionInit.history.length - 1]);
     }
+    if (error) {
+      addHistoryMessage({
+        role: "assistant",
+        content:
+          "The waiter is unreacheable right now (server error). Please try again later.",
+      });
+    }
   }, [sessionInit, error]);
 
   const addHistoryMessage = (message: ChatHistoryMessages): void => {
@@ -128,11 +142,11 @@ export default function ChatBox() {
         returnedSession = await sendWaiterMessage(
           " ",
           waiterSession,
-          setWaiterSession
+          setWaiterSession,
         );
         if (returnedSession != null) {
           addHistoryMessage(
-            returnedSession.history[returnedSession.history.length - 1]
+            returnedSession.history[returnedSession.history.length - 1],
           );
         }
       })();
@@ -143,7 +157,7 @@ export default function ChatBox() {
     const returnedSession = await initCookSession(
       cookID,
       recipe,
-      setCookSession
+      setCookSession,
     );
 
     setWaiterSession((prev) => ({ ...prev, proposedCooks: undefined }));
