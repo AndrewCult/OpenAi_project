@@ -1,7 +1,9 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import WaveSurfer from "wavesurfer.js";
 import Modal from "./Modal";
+import { startHoldMusic, HoldMusic } from "@/lib/holdMusic";
+
+const WAITING_TIME_MS = 10000;
 
 interface WaiterWaitingProps {
   isOpen: boolean;
@@ -12,107 +14,79 @@ export default function WaiterWaitingState({
   isOpen,
   onClose,
 }: WaiterWaitingProps) {
-  const [showLoader, setShowLoader] = useState(true);
-  //const [audioStarted, setAudioStarted] = useState(false); // nuovo stato
-  const waveRef = useRef<HTMLDivElement | null>(null);
-  const wavesurfer = useRef<WaveSurfer | null>(null);
+  // Survives between waits, because this component stays mounted (Modal just renders null)
+  const [muted, setMuted] = useState(false);
+  const musicRef = useRef<HoldMusic | null>(null);
+  const mutedRef = useRef(muted);
+  // Keep the latest onClose without restarting the timer: the parent passes a new
+  // arrow function on every render, which would otherwise reset the countdown
+  const onCloseRef = useRef(onClose);
 
   useEffect(() => {
-    // Reset state
-    setShowLoader(true);
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
-    // Show loader for 8 seconds
-    const timer = setTimeout(() => {
-      setShowLoader(false);
-      onClose();
-    }, 10000);
-    return () => clearTimeout(timer);
+  useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
+
+  // While open: play hold music and close automatically after the waiting time
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const music = startHoldMusic(mutedRef.current);
+    musicRef.current = music;
+    const timer = setTimeout(() => onCloseRef.current(), WAITING_TIME_MS);
+
+    return () => {
+      clearTimeout(timer);
+      music.stop();
+      musicRef.current = null;
+    };
   }, [isOpen]);
 
-  // Inizialize Wavesurfer when loader is finished
-  useEffect(() => {
-    if (isOpen && !showLoader && waveRef.current) {
-      const ws = WaveSurfer.create({
-        container: waveRef.current,
-        waveColor: "#ffffff",
-        progressColor: "#ff0000",
-        cursorColor: "#ffffff",
-        barWidth: 3,
-        barRadius: 2,
-        barGap: 1,
-        fillParent: true,
-        url: "/audio/call-error.wav",
-        autoplay: true,
-        //muted: true, // inizialmente muto per evitare blocchi autoplay
-      });
-
-      wavesurfer.current = ws;
-      let unmuteTimeout: NodeJS.Timeout;
-
-      ws.on("ready", () => {
-        console.log("✅ Wavesurfer pronto, riproduco audio...");
-        ws.play().catch(() => console.warn("Autoplay bloccato dal browser"));
-
-        unmuteTimeout = setTimeout(() => {
-          ws.setMuted(false);
-        }, 100);
-      });
-
-      ws.on("error", (e) => console.error("Errore Wavesurfer:", e));
-
-      ws.on("finish", () => {
-        ws.destroy();
-        clearTimeout(unmuteTimeout);
-        // onClose();
-      });
-    }
-  }, [isOpen, showLoader, onClose]);
+  const toggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    musicRef.current?.setMuted(next);
+  };
 
   return (
-    <>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <div className="flex flex-col flex-wrap items-center justify-center gap-8 cook-card-container w-full">
-          <div className="cook-avatar">
-            <Image
-              src="/avatars/waiterAi.png"
-              alt="Waiter Ai"
-              width={200}
-              height={100}
-            />
-          </div>
-          <div className="flex flex-col items-center text-center p-8">
-            <h2 className="text-3xl font-bold mb-4 gradient-text">
-              Please, stay on the line!!!
-            </h2>
-
-            <p className="text-red-600 font-semibold mb-8 text-lg">
-              I’ll get in touch with the chef you chose...
-            </p>
-
-            <div className="loadership_GRTSL">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-            <div ref={waveRef} className="hidden" />
-
-            {/* {showLoader ? (
-              <div className="loadership_GRTSL">
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-              </div>
-            ) : (
-              <div
-                ref={waveRef}
-                className="w-[300px] h-[100px] gradient-background"
-              />
-            )} */}
-          </div>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="flex flex-col flex-wrap items-center justify-center gap-8 cook-card-container w-full">
+        <div className="cook-avatar">
+          <Image
+            src="/avatars/waiterAi.png"
+            alt="Waiter Ai"
+            width={200}
+            height={100}
+          />
         </div>
-      </Modal>
-    </>
+        <div className="flex flex-col items-center text-center p-8">
+          <h2 className="text-3xl font-bold mb-4 gradient-text">
+            Please, stay on the line!!!
+          </h2>
+
+          <p className="text-red-600 font-semibold mb-8 text-lg">
+            I’ll get in touch with the chef you chose...
+          </p>
+
+          <div className="loadership_GRTSL">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+
+          <button
+            type="button"
+            onClick={toggleMute}
+            className="!mt-6 !px-4 !py-1 rounded-full border border-gray-300 text-gray-600 text-sm hover:border-red-400 hover:text-red-500 transition-colors"
+          >
+            {muted ? "🔈 Unmute hold music" : "🔇 Mute hold music"}
+          </button>
+        </div>
+      </div>
+    </Modal>
   );
 }
