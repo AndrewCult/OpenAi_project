@@ -48,8 +48,8 @@ const MELODY: [string, number][] = [
 ];
 
 const EIGHTH = 0.16; // seconds per eighth note (fast, like a tarantella)
-const VOLUME = 0.05;
-const DUCKED_VOLUME = 0.012; // music volume while the waiter is talking
+const VOLUME = 0.3;
+const DUCKED_VOLUME = 0.08; // music volume while the waiter is talking
 
 const PHRASES = [
   "Your call is important to us. The chef is currently tasting the sauce.",
