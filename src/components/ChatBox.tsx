@@ -18,6 +18,7 @@ import { CookSession } from "@/lib/switchCookState";
 import CookSelectionModal from "@/components/CookSelectionModal";
 import InputChatBox from "@/components/InputChatBox";
 import { useCustomerStats } from "@/context/CustomerStatsContext";
+import { unlockAudio } from "@/lib/holdMusic";
 
 export default function ChatBox() {
   // useState management -> WaiterSession, CookSession, recipe, cookChat, ChatHistory and isSending(user message sending)
@@ -242,6 +243,7 @@ export default function ChatBox() {
           failText={failText}
           onFail={() => setFailText("You need to select a cook to proceed!!!")}
           onSelect={async (id) => {
+            unlockAudio(); // must run inside the tap, before any wait/setTimeout (mobile autoplay rules)
             setIsCookModalOpen(false);
             setIsWaiterModalOpen(true);
             const selectedAt = Date.now();

@@ -89,14 +89,51 @@ function nextPhrase(): string {
   return PHRASES[phraseIndex];
 }
 
+// One AudioContext for the whole page: mobile browsers only let it start inside a user gesture,
+// so it is created/resumed by unlockAudio() on the tap, then reused by every wait.
+let sharedCtx: AudioContext | null = null;
+
+function getAudioContext(): AudioContext {
+  if (!sharedCtx || sharedCtx.state === "closed") {
+    const Ctor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
+    sharedCtx = new Ctor();
+  }
+  return sharedCtx;
+}
+
+// Call this synchronously inside a click/tap handler (before any await or setTimeout).
+export function unlockAudio(): void {
+  try {
+    const ctx = getAudioContext();
+    void ctx.resume();
+    // A one-sample silent buffer: the classic trick to wake up audio on iOS
+    const source = ctx.createBufferSource();
+    source.buffer = ctx.createBuffer(1, 1, 22050);
+    source.connect(ctx.destination);
+    source.start(0);
+    // Speech synthesis also needs its first utterance inside the gesture
+    const synth = window.speechSynthesis;
+    if (synth) {
+      const silent = new SpeechSynthesisUtterance(" ");
+      silent.volume = 0;
+      synth.speak(silent);
+    }
+  } catch {
+    // Audio is a bonus: never break the app because of it
+  }
+}
+
 export interface HoldMusic {
   stop: () => void;
   setMuted: (muted: boolean) => void;
 }
 
 export function startHoldMusic(initiallyMuted = false): HoldMusic {
-  const ctx = new AudioContext();
-  void ctx.resume(); // allowed: the user has already clicked a chef
+  const ctx = getAudioContext();
+  void ctx.resume();
 
   // Signal chain: oscillators -> telephone band-pass (highpass + lowpass) -> master volume
   const master = ctx.createGain();
@@ -174,7 +211,7 @@ export function startHoldMusic(initiallyMuted = false): HoldMusic {
       timers.forEach(clearTimeout);
       synth?.cancel();
       master.gain.setTargetAtTime(0, ctx.currentTime, 0.05); // short fade-out, no click
-      setTimeout(() => void ctx.close(), 300);
+      setTimeout(() => master.disconnect(), 300); // keep the shared context for the next wait
     },
     setMuted: (value: boolean) => {
       muted = value;
