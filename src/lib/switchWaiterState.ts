@@ -2,6 +2,7 @@ import { Cook, cooks } from "@/data/cooks";
 import getRandomCooks from "./getRandomCooks";
 import { ai_assistant } from "./ai_assistant";
 import { run } from "@openai/agents";
+import { parseModelJSON } from "./llm";
 
 export type WaiterState =
   | "WELCOME"
@@ -49,10 +50,16 @@ export async function switchWaiterState(session: Session) {
         bot,
         `extrapolate the name of the recipe from this message as "recipe": ${
           session.history[session.history.length - 1].content
-        } `
+        } `,
       );
       if (!response.finalOutput) return;
-      session.recipe = JSON.parse(response.finalOutput).recipe;
+      try {
+        session.recipe = parseModelJSON<{ recipe?: string }>(
+          response.finalOutput,
+        ).recipe;
+      } catch {
+        session.recipe = session.history[session.history.length - 1].content;
+      }
 
       const cooks_proposition = getRandomCooks(session.usedCooksID || []);
       session.history.push({
@@ -67,7 +74,7 @@ export async function switchWaiterState(session: Session) {
       session.history.push({
         role: "system",
         content: `Give a wierd feedback about the choice the user made, the choise was ${cooks.find(
-          (c) => c.id == session.selectedCookId
+          (c) => c.id == session.selectedCookId,
         )} say goodbye and handoff to the cook to give the recipe`,
       });
       if (!session.selectedCookId) return;

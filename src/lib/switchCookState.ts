@@ -1,5 +1,6 @@
 import { run } from "@openai/agents";
 import { ai_assistant } from "./ai_assistant";
+import { parseModelJSON } from "./llm";
 
 type CookState =
   | "SALUTE"
@@ -24,7 +25,7 @@ export interface CookSession {
 // Function to switch the state of the cook session based on the current step
 
 export default async function switchCookState(
-  session: CookSession
+  session: CookSession,
 ): Promise<CookSession> {
   const bot = ai_assistant();
   let response;
@@ -44,12 +45,14 @@ export default async function switchCookState(
         bot,
         `extrapolate the diets, if any, as "diet":string[]  from this message: ${
           session.history[session.history.length - 1].content
-        } `
+        } `,
       );
 
       if (response.finalOutput) {
         try {
-          session.diet = JSON.parse(response.finalOutput).diet;
+          session.diet = parseModelJSON<{ diet?: string[] }>(
+            response.finalOutput,
+          ).diet;
           console.log(session.diet);
         } catch {
           session.diet = [""];
@@ -68,12 +71,13 @@ export default async function switchCookState(
         bot,
         `extrapolate the allergies, if any, as "allergies":string[] from this message : ${
           session.history[session.history.length - 1].content
-        } `
+        } `,
       );
       if (response.finalOutput) {
         try {
-          session.allergies = JSON.parse(response.finalOutput).allergies;
-          console.log(JSON.parse(response.finalOutput));
+          session.allergies = parseModelJSON<{ allergies?: string[] }>(
+            response.finalOutput,
+          ).allergies;
         } catch {
           session.allergies = [""];
         }

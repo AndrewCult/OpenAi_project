@@ -1,11 +1,11 @@
 import { switchWaiterState } from "@/lib/switchWaiterState";
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import { getLLMClient, LLM_MODEL } from "@/lib/llm";
 import type { ChatCompletionMessageParam } from "openai/resources/chat";
 
 export async function POST(request: Request) {
   try {
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const openai = getLLMClient();
     const { session } = await request.json();
     const newSession = await switchWaiterState(session);
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     console.log("Next Step:", newSession.step);
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: LLM_MODEL,
       messages: newSession.history as ChatCompletionMessageParam[],
     });
 
