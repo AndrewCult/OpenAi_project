@@ -17,6 +17,7 @@ import {
 import { CookSession } from "@/lib/switchCookState";
 import CookSelectionModal from "@/components/CookSelectionModal";
 import InputChatBox from "@/components/InputChatBox";
+import { useCustomerStats } from "@/context/CustomerStatsContext";
 
 export default function ChatBox() {
   // useState management -> WaiterSession, CookSession, recipe, cookChat, ChatHistory and isSending(user message sending)
@@ -32,9 +33,15 @@ export default function ChatBox() {
   const [chatHistory, setChatHistory] = useState<ChatHistoryMessages[]>([]);
   const [isSending, setIsSending] = useState(false); // user message state of sending to api, it should prevent spam from user
 
+  const {
+    setRecipe: setStatsRecipe,
+    addConsultedCook,
+    addWaitingTime,
+  } = useCustomerStats();
   const sendMessage = async (input: string) => {
     if (isSending) return;
     setIsSending(true);
+    const sentAt = Date.now();
 
     const userInput = { role: "user", content: input };
     addHistoryMessage(userInput);
@@ -78,6 +85,7 @@ export default function ChatBox() {
       });
     } finally {
       setIsSending(false);
+      addWaitingTime(Date.now() - sentAt);
     }
   };
 
@@ -123,12 +131,12 @@ export default function ChatBox() {
     setChatHistory((prev) => [...prev, message]);
   };
 
-  // TODO: Recipe doesn't show nothing on frontend
   useEffect(() => {
     if (waiterSession?.recipe) {
       setRecipe(waiterSession.recipe);
+      setStatsRecipe(waiterSession.recipe);
     }
-  }, [waiterSession]);
+  }, [waiterSession, setStatsRecipe]);
 
   // Return to waiter from cookChat finished
   useEffect(() => {
@@ -173,6 +181,7 @@ export default function ChatBox() {
     }
 
     setCookChat(true);
+    addConsultedCook(cookID);
 
     return cookID;
   };
@@ -235,8 +244,10 @@ export default function ChatBox() {
           onSelect={async (id) => {
             setIsCookModalOpen(false);
             setIsWaiterModalOpen(true);
+            const selectedAt = Date.now();
             setTimeout(async () => {
               await startCookCommunication(id);
+              addWaitingTime(Date.now() - selectedAt);
             }, 7000);
           }}
         />
