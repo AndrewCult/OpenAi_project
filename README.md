@@ -226,3 +226,11 @@ The app sets no cookies, uses no analytics and stores no conversations. Chat mes
 ## 👥 Credits
 
 Originally created as a team project ([original repository](https://github.com/StefAltavista/OpenAi_project)). This version is maintained and extended by **Andrea Cultraro**.
+
+---
+
+## 📄 License
+
+The source code is released under the [MIT License](LICENSE).
+
+The license does **not** cover the maintainer's personal information and personal website (name, website link and contact details in `src/data/siteInfo.ts`, shown on the Contact, Privacy Policy and Terms of Service pages). If you reuse this project, replace them with your own.
