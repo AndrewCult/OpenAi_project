@@ -1,9 +1,20 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Modal from "./Modal";
-import { startHoldMusic, HoldMusic } from "@/lib/holdMusic";
 
 const WAITING_TIME_MS = 10000;
+const PHRASE_INTERVAL_MS = 2600;
+const QUEUE_INTERVAL_MS = 1700;
+const FADE_MS = 300;
+
+const PHRASES = [
+    "Your call is important to us.",
+    "The chef is currently tasting the sauce.",
+    "Your recipe is being lost as we speak.",
+    "All our chefs are busy pretending to cook.",
+    "This call may be recorded and laughed at for training purposes.",
+    "The chef will be with you shortly. Shortly is a relative concept.",
+];
 
 interface WaiterWaitingProps {
   isOpen: boolean;
@@ -14,42 +25,51 @@ export default function WaiterWaitingState({
   isOpen,
   onClose,
 }: WaiterWaitingProps) {
-  // Survives between waits, because this component stays mounted (Modal just renders null)
-  const [muted, setMuted] = useState(false);
-  const musicRef = useRef<HoldMusic | null>(null);
-  const mutedRef = useRef(muted);
-  // Keep the latest onClose without restarting the timer: the parent passes a new
-  // arrow function on every render, which would otherwise reset the countdown
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [phraseVisible, setPhraseVisible] = useState(true);
+  const [queuePosition, setQueuePosition] = useState(3);
+  // Keep the latest onClose without restarting the timers: the parent passes a new arrow function on every render, which would otherwise reset the countdown
   const onCloseRef = useRef(onClose);
 
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  useEffect(() => {
-    mutedRef.current = muted;
-  }, [muted]);
-
   // While open: play hold music and close automatically after the waiting time
   useEffect(() => {
     if (!isOpen) return;
 
-    const music = startHoldMusic(mutedRef.current);
-    musicRef.current = music;
-    const timer = setTimeout(() => onCloseRef.current(), WAITING_TIME_MS);
+    setPhraseIndex(Math.floor(Math.random() * PHRASES.length));
+    setPhraseVisible(true);
+    setQueuePosition(3);
+
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+
+    // Fade out, swap the text, fade back in
+    const phraseTimer = setInterval(() => {
+      setPhraseVisible(false);
+      timeouts.push(
+        setTimeout(() => {
+          setPhraseIndex((i) => (i + 1) % PHRASES.length);
+          setPhraseVisible(true);
+        }, FADE_MS)
+      );
+    }, PHRASE_INTERVAL_MS);
+
+    // The joke: the queue position goes UP
+    const queueTimer = setInterval(() => {
+      setQueuePosition((p) => p + 1 + Math.floor(Math.random() * 3));
+    }, QUEUE_INTERVAL_MS);
+
+    const closeTimer = setTimeout(() => onCloseRef.current(), WAITING_TIME_MS);
 
     return () => {
-      clearTimeout(timer);
-      music.stop();
-      musicRef.current = null;
+      clearInterval(phraseTimer);
+      clearInterval(queueTimer);
+      clearTimeout(closeTimer);
+      timeouts.forEach(clearTimeout);
     };
   }, [isOpen]);
-
-  const toggleMute = () => {
-    const next = !muted;
-    setMuted(next);
-    musicRef.current?.setMuted(next);
-  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -62,12 +82,12 @@ export default function WaiterWaitingState({
             height={100}
           />
         </div>
-        <div className="flex flex-col items-center text-center p-8">
-          <h2 className="text-3xl font-bold mb-4 gradient-text">
+        <div className="flex flex-col items-center text-center !p-8">
+          <h2 className="text-3xl font-bold !mb-4 gradient-text">
             Please, stay on the line!!!
           </h2>
 
-          <p className="text-red-600 font-semibold mb-8 text-lg">
+          <p className="text-red-600 font-semibold !mb-8 text-lg">
             I’ll get in touch with the chef you chose...
           </p>
 
@@ -78,13 +98,22 @@ export default function WaiterWaitingState({
             <div></div>
           </div>
 
-          <button
-            type="button"
-            onClick={toggleMute}
-            className="!mt-6 !px-4 !py-1 rounded-full border border-gray-300 text-gray-600 text-sm hover:border-red-400 hover:text-red-500 transition-colors"
+          {/* aria-live: screen readers announce each new caption */}
+          <p
+            aria-live="polite"
+            className={`!mt-8 min-h-[3.5rem] max-w-sm italic text-gray-600 transition-opacity duration-300 ${
+              phraseVisible ? "opacity-100" : "opacity-0"
+            }`}
           >
-            {muted ? "🔈 Unmute hold music" : "🔇 Mute hold music"}
-          </button>
+            “{PHRASES[phraseIndex]}”
+          </p>
+
+          <p className="!mt-2 text-sm text-gray-500">
+            Your position in the queue:{" "}
+            <span key={queuePosition} className="queue-bump font-bold text-red-500">
+              {queuePosition}
+            </span>
+          </p>
         </div>
       </div>
     </Modal>
