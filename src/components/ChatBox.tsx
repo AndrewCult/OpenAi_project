@@ -204,7 +204,7 @@ export default function ChatBox() {
   return (
     <div className="chat-container relative w-full max-w-5xl flex flex-col h-full p-6">
       <div className="flex-1 min-h-0 flex flex-col">
-        <div ref={scrollRef} className="chat-scroll hide-scrollbar">
+        <div ref={scrollRef} className="chat-scroll">
           <ChatHistory history={chatHistory ? chatHistory : []} />
         </div>
 
