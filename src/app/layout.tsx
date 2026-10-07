@@ -5,8 +5,12 @@ import Footer from "@/components/Footer";
 import { CustomerStatsProvider } from "@/context/CustomerStatsContext";
 
 export const metadata: Metadata = {
-  title: "OpenAi Project",
-  description: "",
+  title: {
+    default: "Recipe Chatbot · SummerCamp Bistrò",
+    template: "%s",
+  },
+  description:
+    "A deliberately unhelpful AI restaurant: ask for a recipe, get put on hold, never get the recipe.",
 };
 
 export default function RootLayout({
