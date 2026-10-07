@@ -1,5 +1,5 @@
 import { Agent } from "@openai/agents";
-import { configureAgents, LLM_MODEL } from "./llm";
+import { configureAgents, LLM_MAX_TOKENS, LLM_MODEL } from "./llm";
 
 export function ai_assistant() {
   configureAgents();
@@ -8,6 +8,7 @@ export function ai_assistant() {
     name: "JSON_CREATOR",
     instructions,
     model: LLM_MODEL,
+    modelSettings: { maxTokens: LLM_MAX_TOKENS },
   });
   return bot;
 }

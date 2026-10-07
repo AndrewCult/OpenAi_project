@@ -2,7 +2,7 @@ import { run } from "@openai/agents";
 import { ai_assistant } from "./ai_assistant";
 import { parseModelJSON } from "./llm";
 
-type CookState =
+export type CookState =
   | "SALUTE"
   | "ASK_ALLERGY"
   | "ASK_DIET"
@@ -33,7 +33,7 @@ export default async function switchCookState(
     // Initial greeting and asking about diet
     case "SALUTE":
       session.history.push({
-        role: "cook",
+        role: "system",
         content: `Say Hello to our guest, make a silly comment about the recipe and ask if the user is on a specific diet`,
       });
       session.step = "ASK_ALLERGY";

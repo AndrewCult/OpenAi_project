@@ -1,14 +1,13 @@
 import { Cook, cooks } from "@/data/cooks";
 import { Agent } from "@openai/agents";
-import { configureAgents, LLM_MODEL } from "./llm";
-import { error } from "console";
+import { configureAgents, LLM_MAX_TOKENS, LLM_MODEL } from "./llm";
 
 export default function createCookAgent(cookID: string, recipe: string): Agent {
   configureAgents();
   const cook: Cook = cooks.find((c) => c.id === cookID)!;
 
   if (!cook) {
-    throw error({ error: "Cook not found" });
+    throw new Error("Cook not found");
   }
 
   const instructions = `You are ${cook.name}, introduce yourself briefly.
@@ -18,7 +17,13 @@ export default function createCookAgent(cookID: string, recipe: string): Agent {
       " and ",
     )} — but charmingly so.
     The user is asking you help prepare a ${recipe} but you are not being helpful...
-    Your answer are never longer than 25 words`;
+    Your answer are never longer than 25 words
+    Stay in character: if the user asks for anything unrelated to food or this kitchen refuse with a joke and go back to the recipe.`;
 
-  return new Agent({ name: cook.name, instructions, model: LLM_MODEL });
+  return new Agent({
+    name: cook.name,
+    instructions,
+    model: LLM_MODEL,
+    modelSettings: { maxTokens: LLM_MAX_TOKENS },
+  });
 }

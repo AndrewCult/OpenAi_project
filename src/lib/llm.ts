@@ -9,6 +9,10 @@ import {
 // LLM_* vars take precedence; OPENAI_API_KEY is kept as a fallback for the original setup.
 export const LLM_MODEL = process.env.LLM_MODEL ?? "gpt-4o-mini";
 
+// Upper bound on each reply: replies are short anyway, this only stops abuse.
+// Reasoning models (e.g. gpt-oss) count their "thinking" here too, so keep it generous.
+export const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS) || 1024;
+
 let client: OpenAI | null = null;
 
 // Created lazily (on first request), so `next build` doesn't need the env vars.

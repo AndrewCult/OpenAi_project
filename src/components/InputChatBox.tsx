@@ -20,6 +20,7 @@ export default function InputChatBox({
       <input
         type="text"
         value={userInput}
+        maxLength={300} // same limit as the server (LIMITS.maxUserMessageChars)
         onChange={({ target }) => setUserInput(target.value)}
         className="input-field"
         placeholder={

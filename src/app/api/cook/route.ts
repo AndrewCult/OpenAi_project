@@ -1,61 +1,61 @@
 import createAgent from "@/lib/createAgent";
 import { NextResponse } from "next/server";
 import { run } from "@openai/agents";
-import switchCookState, { CookSession } from "@/lib/switchCookState";
+import switchCookState from "@/lib/switchCookState";
 import { ai_assistant } from "@/lib/ai_assistant";
 import { parseModelJSON } from "@/lib/llm";
+import {
+  BadRequestError,
+  parseCookSession,
+  readJsonBody,
+} from "@/lib/requestGuards";
 
 export async function POST(request: Request) {
-  const { session } = await request.json();
-  let cookAgent;
-
   try {
-    cookAgent = createAgent(session.cookID, session.recipe);
-  } catch {
-    return NextResponse.json({ error: "Error creating cook" }, { status: 500 });
-  }
+    const body = await readJsonBody(request);
+    const session = parseCookSession(body.session);
 
-  const newSession: CookSession = await switchCookState(session);
+    const cookAgent = createAgent(session.cookID, session.recipe);
+    const newSession = await switchCookState(session);
 
-  try {
     const result = await run(
       cookAgent,
-      newSession.history
-        .map(
-          (m: { role: string; content: string }) => `${m.role}: ${m.content}`,
-        )
-        .join("\n"),
+      newSession.history.map((m) => `${m.role}: ${m.content}`).join("\n"),
     );
 
-    if (session.step == "END") {
-      const bot = ai_assistant();
+    if (!result.finalOutput) {
+      return NextResponse.json(
+        { error: "Empty reply from the model" },
+        { status: 502 },
+      );
+    }
+
+    if (newSession.step === "END") {
       const getIngredientsList = await run(
-        bot,
+        ai_assistant(),
         `from the following message extrapolate the ingredients list in JSON format and put the message (without list) in a separate field "message" : ${result.finalOutput}`,
       );
-      if (getIngredientsList.finalOutput) {
-        let parsed: { message?: string; ingredients?: string[] } = {};
-        try {
-          parsed = parseModelJSON(getIngredientsList.finalOutput);
-        } catch {
-          // Fall back to the cook's raw answer if the model didn't return valid JSON
-        }
-        newSession.history.push({
-          role: "cook",
-          content: parsed.message ?? result.finalOutput ?? "",
-        });
-        newSession.ingredients = parsed.ingredients;
-        return NextResponse.json(newSession);
+
+      let parsed: { message?: string; ingredients?: string[] } = {};
+      try {
+        parsed = parseModelJSON(getIngredientsList.finalOutput ?? "");
+      } catch {
+        // Fall back to the cook's raw answer if the model didn't return valid JSON
       }
-    } else if (!result.finalOutput) return;
-    else
       newSession.history.push({
         role: "cook",
-        content: result.finalOutput,
+        content: parsed.message ?? result.finalOutput,
       });
+      newSession.ingredients = parsed.ingredients;
+      return NextResponse.json(newSession);
+    }
 
+    newSession.history.push({ role: "cook", content: result.finalOutput });
     return NextResponse.json(newSession);
   } catch (error) {
+    if (error instanceof BadRequestError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error("Error generating AI response:", error);
     return NextResponse.json(
       { error: "Error generating AI response" },
