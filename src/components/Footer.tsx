@@ -1,17 +1,21 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <div className="header-footer">
       <div className="footer-content">
-        <a href="#" className="footer-link">
+        <Link href="/privacy" className="footer-link">
           Privacy Policy
-        </a>
-        <a href="#" className="footer-link">
+        </Link>
+        <Link href="/terms" className="footer-link">
           Terms of Service
-        </a>
-        <span className="footer-link">© 2025 SummerCamp Bistrò</span>
-        <a href="#" className="footer-link">
-          Contact Us
-        </a>
+        </Link>
+        <span className="footer-link">
+          © {new Date().getFullYear()} SummerCamp Bistrò
+        </span>
+        <Link href="/contact" className="footer-link">
+          Contact
+        </Link>
       </div>
     </div>
   );
