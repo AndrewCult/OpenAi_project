@@ -53,7 +53,7 @@ export default function CookSelectionModal({
                 </div>
                 <div>
                   <span className="cook-detail-label">Cuisine:</span>
-                  {cook.cousine}
+                  {cook.cuisine}
                 </div>
               </div>
             </div>

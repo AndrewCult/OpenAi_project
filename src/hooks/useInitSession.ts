@@ -6,23 +6,29 @@ import { CookSession } from "@/lib/switchCookState";
 
 export default function useInitSession<T extends Session | CookSession>(
   init: T,
-  url: string
+  url: string,
 ) {
+  // Freeze the first value: the session must be created once, even if the
+  // parent re-renders and passes an updated object later
+  const [initialSession] = useState(init);
   const [sessionInit, setSessionInit] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    createSession();
-  }, []);
+    let cancelled = false; // ignore the result if the component unmounted meanwhile
 
-  const createSession = async () => {
-    try {
-      const session = await sessionStep(init, url);
-      setSessionInit(session);
-    } catch {
-      setError("Failed to create session");
-    }
-  };
+    sessionStep(initialSession, url)
+      .then((session) => {
+        if (!cancelled) setSessionInit(session);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Failed to create session");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialSession, url]);
 
   return { sessionInit, error };
 }

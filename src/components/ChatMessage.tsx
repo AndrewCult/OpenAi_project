@@ -5,7 +5,6 @@ type ChatMessageProps = {
   content: string;
   role: string;
   id?: string;
-  onShowCookModal?: () => void;
 };
 
 // Receive detail of interaction from user to Waiter or from user to Cook
@@ -16,7 +15,6 @@ export default function ChatMessage({ content, role, id }: ChatMessageProps) {
   let altText = "";
   let messageClasses = "";
   let avatarClasses = "";
-  //let alignClass = "";
 
   // Branch user
   if (role === "user") {
@@ -24,7 +22,6 @@ export default function ChatMessage({ content, role, id }: ChatMessageProps) {
     altText = "user";
     messageClasses = "message-user";
     avatarClasses = "user-avatar";
-    //alignClass = "flex-row-reverse";
     // Branch Cook
   } else if (role === "cook" && id) {
     const selectedCook = cooks.find((cook) => cook.id === id);
@@ -52,12 +49,12 @@ export default function ChatMessage({ content, role, id }: ChatMessageProps) {
           alt={altText}
           width={80}
           height={80}
-          className={`${avatarClasses} rounded-full object-cover align-top"`}
+          className={`${avatarClasses} rounded-full object-cover align-top`}
         />
       </div>
 
       <div className={`${messageClasses} max-w-[70%] self-start`}>
-         <p className="text-sm md:text-base lg:text-lg font-medium leading-none whitespace-pre-wrap" >
+        <p className="text-sm md:text-base lg:text-lg font-medium leading-none whitespace-pre-wrap">
           {content}
         </p>
       </div>

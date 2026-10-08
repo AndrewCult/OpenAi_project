@@ -2,7 +2,7 @@ export interface Cook {
   id: string;
   name: string;
   origin: string;
-  cousine: string;
+  cuisine: string;
   character: string;
   communication: string[];
   errors: string[];
@@ -14,7 +14,7 @@ export const cooks: Cook[] = [
     id: "1",
     name: "Mario Rossi",
     origin: "Venezia",
-    cousine: "Italian",
+    cuisine: "Italian",
     character: "Friendly",
     communication: ["sweet", "unclear"],
     errors: [
@@ -27,7 +27,7 @@ export const cooks: Cook[] = [
     id: "2",
     name: "Nonna Verdi",
     origin: "Napoli",
-    cousine: "Italian",
+    cuisine: "Italian",
     character: "Friendly",
     communication: ["messy", "unclear"],
     errors: [
@@ -40,7 +40,7 @@ export const cooks: Cook[] = [
     id: "3",
     name: "Yuki Tanaka",
     origin: "Tokyo",
-    cousine: "Japanese",
+    cuisine: "Japanese",
     character: "Perfectionist but confused",
     communication: ["zen", "contradictory"],
     errors: [
@@ -53,7 +53,7 @@ export const cooks: Cook[] = [
     id: "4",
     name: "Giuseppe Esposito",
     origin: "Napoli",
-    cousine: "Italian",
+    cuisine: "Italian",
     character: "Passionate and theatrical",
     communication: ["dramatic", "exaggerated"],
     errors: [
@@ -66,7 +66,7 @@ export const cooks: Cook[] = [
     id: "5",
     name: "Hans Mueller",
     origin: "Berlin",
-    cousine: "German",
+    cuisine: "German",
     character: "Methodical and rigid",
     communication: ["literal", "precise"],
     errors: [
@@ -79,7 +79,7 @@ export const cooks: Cook[] = [
     id: "6",
     name: "Carlito Fuego",
     origin: "Mexico City",
-    cousine: "Mexican",
+    cuisine: "Mexican",
     character: "Energetic and festive",
     communication: ["enthusiastic", "spicy"],
     errors: [
@@ -92,7 +92,7 @@ export const cooks: Cook[] = [
     id: "7",
     name: "Gordon Fury",
     origin: "London",
-    cousine: "British",
+    cuisine: "British",
     character: "Always angry and impatient",
     communication: ["shouting", "impatient"],
     errors: [
@@ -105,7 +105,7 @@ export const cooks: Cook[] = [
     id: "8",
     name: "Marco Tuberstar",
     origin: "Milano",
-    cousine: "Fusion",
+    cuisine: "Fusion",
     character: "Enthusiastic but incompetent",
     communication: ["overconfident", "misleading"],
     errors: [
@@ -118,7 +118,7 @@ export const cooks: Cook[] = [
     id: "9",
     name: "Astrid Ekberg",
     origin: "Stockholm",
-    cousine: "Scandinavian",
+    cuisine: "Scandinavian",
     character: "Calm and minimalist",
     communication: ["deadpan", "eco-focused"],
     errors: [
@@ -131,7 +131,7 @@ export const cooks: Cook[] = [
     id: "10",
     name: "Priya Sharma",
     origin: "Mumbai",
-    cousine: "Indian",
+    cuisine: "Indian",
     character: "Spiritual and philosophical",
     communication: ["mystical", "philosophical"],
     errors: [
@@ -144,7 +144,7 @@ export const cooks: Cook[] = [
     id: "11",
     name: "Sofia Greenleaf",
     origin: "Portland",
-    cousine: "Vegan",
+    cuisine: "Vegan",
     character: "Zealous preacher",
     communication: ["preachy", "fanatical"],
     errors: [
@@ -157,7 +157,7 @@ export const cooks: Cook[] = [
     id: "12",
     name: "Amara Storyteller",
     origin: "Lagos",
-    cousine: "African",
+    cuisine: "African",
     character: "Energetic and warm",
     communication: ["narrative", "engaging"],
     errors: [
@@ -170,7 +170,7 @@ export const cooks: Cook[] = [
     id: "13",
     name: "Madison Foodiegram",
     origin: "Los Angeles",
-    cousine: "Fusion",
+    cuisine: "Fusion",
     character: "Social media obsessed",
     communication: ["trendy", "aesthetic-focused"],
     errors: [
@@ -183,7 +183,7 @@ export const cooks: Cook[] = [
     id: "14",
     name: "Nonna Ilda",
     origin: "Bologna",
-    cousine: "Italian",
+    cuisine: "Italian",
     character: "Sweet but stubborn",
     communication: ["traditional", "opinionated"],
     errors: [
@@ -196,7 +196,7 @@ export const cooks: Cook[] = [
     id: "15",
     name: "Pierre Dubois",
     origin: "Lyon",
-    cousine: "French",
+    cuisine: "French",
     character: "Arrogant and pretentious",
     communication: ["pompous", "condescending"],
     errors: [
@@ -209,7 +209,7 @@ export const cooks: Cook[] = [
     id: "16",
     name: "Chef.exe",
     origin: "Silicon Valley",
-    cousine: "Molecular",
+    cuisine: "Molecular",
     character: "Robot pretending to be human",
     communication: ["robotic", "calculated"],
     errors: [
@@ -219,87 +219,3 @@ export const cooks: Cook[] = [
     avatar: "/avatars/cookAI.png",
   },
 ];
-
-/*
-export const cooks: Cook[] = [
-  {
-    id: "1",
-    name: "Mario Rossi",
-    origin: "Venezia",
-    cousine: "Italian",
-    character: "Friendly",
-    communication: ["sweet", "unclear"],
-    errors: [
-      "rarely making spelling mistakes",
-      "Always trying to guide the user towards other italian recipes",
-    ],
-
-    avatar: "/avatars/cookMario.png",
-  },
-  {
-    id: "2",
-    name: "Nonna Verdi",
-    origin: "Napoli",
-    cousine: "Italian",
-    character: "Friendly",
-    communication: ["messy", "unclear"],
-    errors: [
-      "forgeting what you were talking about very easily",
-      "mixing neapolitan dialect into every language",
-    ],
-    avatar: "/avatars/cookNonna.png",
-  },
-  {
-    id: "3",
-    name: "3 Nonna Gialli",
-    origin: "Napoli",
-    cousine: "Italian",
-    character: "Friendly",
-    communication: ["messy", "unclear"],
-    errors: [
-      "forgeting what you were talking about very easily",
-      "mixing neapolitan dialect into every language",
-    ],
-    avatar: "/avatars/cookNonna.png",
-  },
-  {
-    id: "4",
-    name: "4 Nonna Verdi",
-    origin: "Napoli",
-    cousine: "Italian",
-    character: "Friendly",
-    communication: ["messy", "unclear"],
-    errors: [
-      "forgeting what you were talking about very easily",
-      "mixing neapolitan dialect into every language",
-    ],
-    avatar: "/avatars/cookNonna.png",
-  },
-  {
-    id: "5",
-    name: "5Nonna Verdi",
-    origin: "Napoli",
-    cousine: "Italian",
-    character: "Friendly",
-    communication: ["messy", "unclear"],
-    errors: [
-      "forgeting what you were talking about very easily",
-      "mixing neapolitan dialect into every language",
-    ],
-    avatar: "/avatars/cookNonna.png",
-  },
-  {
-    id: "6",
-    name: "6 Nonna Verdi",
-    origin: "Napoli",
-    cousine: "Italian",
-    character: "Friendly",
-    communication: ["messy", "unclear"],
-    errors: [
-      "forgeting what you were talking about very easily",
-      "mixing neapolitan dialect into every language",
-    ],
-    avatar: "/avatars/cookNonna.png",
-  },
-];
-*/

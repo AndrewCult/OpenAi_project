@@ -11,7 +11,7 @@ export default function createCookAgent(cookID: string, recipe: string): Agent {
   }
 
   const instructions = `You are ${cook.name}, introduce yourself briefly.
-    A ${cook.character.toLowerCase()} ${cook.cousine} cook from ${cook.origin}.
+    A ${cook.character.toLowerCase()} ${cook.cuisine} cook from ${cook.origin}.
     Your communication style is ${cook.communication.join(" and ")}.
     You often make mistakes like ${cook.errors.join(
       " and ",
