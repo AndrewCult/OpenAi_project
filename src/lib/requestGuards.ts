@@ -29,7 +29,6 @@ const WAITER_STEPS: WaiterState[] = [
 const COOK_STEPS: CookState[] = [
   "SALUTE",
   "ASK_ALLERGY",
-  "ASK_DIET",
   "RANDOM_QUESTION",
   "LIST_INGREDIENTS",
   "END",
@@ -40,9 +39,12 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
 // Reads the body with a size cap, then parses it
-export async function readJsonBody(request: Request): Promise<Record<string, unknown>> {
+export async function readJsonBody(
+  request: Request,
+): Promise<Record<string, unknown>> {
   const raw = await request.text();
-  if (raw.length > LIMITS.maxBodyBytes) throw new BadRequestError("Request too large");
+  if (raw.length > LIMITS.maxBodyBytes)
+    throw new BadRequestError("Request too large");
   try {
     const body = JSON.parse(raw);
     if (!isObject(body)) throw new Error();
@@ -54,14 +56,25 @@ export async function readJsonBody(request: Request): Promise<Record<string, unk
 
 // Keeps only the roles the client is allowed to send. "system" messages are ALWAYS dropped:
 // instructions are rebuilt on the server, so a forged instruction never reaches the model.
-function sanitizeHistory(history: unknown, allowedRoles: string[]): ChatMessage[] {
+function sanitizeHistory(
+  history: unknown,
+  allowedRoles: string[],
+): ChatMessage[] {
   if (!Array.isArray(history)) throw new BadRequestError("Invalid history");
 
   const clean: ChatMessage[] = [];
   for (const m of history) {
-    if (!isObject(m) || typeof m.role !== "string" || typeof m.content !== "string") continue;
+    if (
+      !isObject(m) ||
+      typeof m.role !== "string" ||
+      typeof m.content !== "string"
+    )
+      continue;
     if (!allowedRoles.includes(m.role)) continue;
-    const limit = m.role === "user" ? LIMITS.maxUserMessageChars : LIMITS.maxOtherMessageChars;
+    const limit =
+      m.role === "user"
+        ? LIMITS.maxUserMessageChars
+        : LIMITS.maxOtherMessageChars;
     if (m.role === "user" && m.content.length > limit) {
       throw new BadRequestError("Message too long");
     }
@@ -80,7 +93,8 @@ const isKnownCook = (id: unknown): id is string =>
 
 export function parseWaiterSession(input: unknown): Session {
   if (!isObject(input)) throw new BadRequestError("Invalid session");
-  if (!WAITER_STEPS.includes(input.step as WaiterState)) throw new BadRequestError("Invalid step");
+  if (!WAITER_STEPS.includes(input.step as WaiterState))
+    throw new BadRequestError("Invalid step");
 
   const usedCooksID = Array.isArray(input.usedCooksID)
     ? input.usedCooksID
@@ -94,7 +108,9 @@ export function parseWaiterSession(input: unknown): Session {
     history: sanitizeHistory(input.history, ["user", "assistant"]),
     usedCooksID,
     recipe: sanitizeRecipe(input.recipe),
-    selectedCookId: isKnownCook(input.selectedCookId) ? input.selectedCookId : undefined,
+    selectedCookId: isKnownCook(input.selectedCookId)
+      ? input.selectedCookId
+      : undefined,
     // proposedCooks is display data for the browser only: always recomputed on the server
     proposedCooks: undefined,
   };
@@ -102,7 +118,8 @@ export function parseWaiterSession(input: unknown): Session {
 
 export function parseCookSession(input: unknown): CookSession {
   if (!isObject(input)) throw new BadRequestError("Invalid session");
-  if (!COOK_STEPS.includes(input.step as CookState)) throw new BadRequestError("Invalid step");
+  if (!COOK_STEPS.includes(input.step as CookState))
+    throw new BadRequestError("Invalid step");
   if (!isKnownCook(input.cookID)) throw new BadRequestError("Unknown cook");
 
   return {

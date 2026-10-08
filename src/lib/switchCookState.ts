@@ -5,7 +5,6 @@ import { parseModelJSON } from "./llm";
 export type CookState =
   | "SALUTE"
   | "ASK_ALLERGY"
-  | "ASK_DIET"
   | "RANDOM_QUESTION"
   | "LIST_INGREDIENTS"
   | "END"
@@ -43,7 +42,7 @@ export default async function switchCookState(
     case "ASK_ALLERGY":
       response = await run(
         bot,
-        `extrapolate the diets, if any, as "diet":string[]  from this message: ${
+        `Extract the diet, if any, as "diet":string[]  from this message: ${
           session.history[session.history.length - 1].content
         } `,
       );
@@ -53,14 +52,13 @@ export default async function switchCookState(
           session.diet = parseModelJSON<{ diet?: string[] }>(
             response.finalOutput,
           ).diet;
-          console.log(session.diet);
         } catch {
           session.diet = [""];
         }
       }
       session.history.push({
         role: "system",
-        content: `ask if the user has any alleregies `,
+        content: `Ask if the user has any allergies `,
       });
       session.step = "RANDOM_QUESTION";
       return session;
@@ -69,7 +67,7 @@ export default async function switchCookState(
     case "RANDOM_QUESTION":
       response = await run(
         bot,
-        `extrapolate the allergies, if any, as "allergies":string[] from this message : ${
+        `Extract the allergies, if any, as "allergies":string[] from this message : ${
           session.history[session.history.length - 1].content
         } `,
       );
@@ -85,7 +83,7 @@ export default async function switchCookState(
 
       session.history.push({
         role: "system",
-        content: `make a completely random question`,
+        content: `Ask a completely random question`,
       });
       session.step = "LIST_INGREDIENTS";
       return session;
@@ -94,7 +92,7 @@ export default async function switchCookState(
     case "LIST_INGREDIENTS":
       session.history.push({
         role: "system",
-        content: `Now give a wrong recipe... (at the end of the message also add a list of ingredients with random scales and maybe some allergens or non-dietary ingridients?) `,
+        content: `Now give a deliberately wrong recipe. At the end of the message, add a list of ingredients with random quantities, possibly including allergens or ingredients that clash with the user's diet.`,
       });
       session.step = "END";
       return session;
