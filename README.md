@@ -1,5 +1,8 @@
 # 🍝 Recipe Chatbot — SummerCamp Bistrò
 
+[![CI](https://github.com/AndrewCult/OpenAi_project/actions/workflows/ci.yml/badge.svg)](https://github.com/AndrewCult/OpenAi_project/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **Live demo:** [open-ai-project-psi.vercel.app](https://open-ai-project-psi.vercel.app)
 
 A responsive web app built with **Next.js**, **TypeScript** and **TailwindCSS** that turns an AI chatbot into a deliberately unhelpful restaurant experience.
@@ -7,6 +10,8 @@ A responsive web app built with **Next.js**, **TypeScript** and **TailwindCSS** 
 You ask a virtual waiter for a recipe. He proposes three chefs; you pick one and get put on hold. The chef then chats with you for five turns, always confusing, always funny, and never actually giving you the recipe. When the chat ends, the waiter apologizes and proposes new chefs, and the cycle starts again.
 
 > ⚠️ This is a joke, not a cookbook: recipes and allergen information are intentionally wrong.
+
+![A chef at the SummerCamp Bistrò, avoiding the recipe as usual](docs/screenshot.png)
 
 ---
 
@@ -74,11 +79,12 @@ LLM_BASE_URL=https://api.groq.com/openai/v1
 LLM_MODEL=openai/gpt-oss-20b
 ```
 
-| Variable       | Required | Description                                                                            |
-| -------------- | -------- | -------------------------------------------------------------------------------------- |
-| `LLM_API_KEY`  | yes      | API key of your provider. Falls back to `OPENAI_API_KEY` if not set.                   |
-| `LLM_BASE_URL` | no       | Base URL of an OpenAI-compatible API. If omitted, the official OpenAI API is used.     |
-| `LLM_MODEL`    | no       | Model ID used by the waiter, the chefs and the JSON assistant. Default: `gpt-4o-mini`. |
+| Variable         | Required | Description                                                                              |
+| ---------------- | -------- | ---------------------------------------------------------------------------------------- |
+| `LLM_API_KEY`    | yes      | API key of your provider. Falls back to `OPENAI_API_KEY` if not set.                     |
+| `LLM_BASE_URL`   | no       | Base URL of an OpenAI-compatible API. If omitted, the official OpenAI API is used.       |
+| `LLM_MODEL`      | no       | Model ID used by the waiter, the chefs and the JSON assistant. Default: `gpt-4o-mini`.   |
+| `LLM_MAX_TOKENS` | no       | Maximum tokens per model reply. Default: `1024` (reasoning models need room to "think"). |
 
 **Switching provider** only requires changing these values:
 
@@ -128,6 +134,7 @@ src/
 │   ├── terms/page.tsx        # Terms of Service
 │   ├── contact/page.tsx      # Contact page
 │   ├── layout.tsx            # Header, footer, shared stats provider
+│   ├── opengraph-image.tsx   # Link preview image, rendered at build time
 │   ├── page.tsx              # Home: the chat
 │   └── globals.css
 ├── components/               # Chat, modals, loyalty card, legal page layout...
@@ -139,6 +146,7 @@ src/
 ├── hooks/                    # useInitSession
 └── lib/
     ├── llm.ts                # LLM client, Agents SDK setup, JSON parsing
+    ├── requestGuards.ts      # Validation of the sessions sent by the browser
     ├── switchWaiterState.ts  # Waiter state machine
     ├── switchCookState.ts    # Chef state machine
     ├── createAgent.ts        # Builds a chef agent from its personality
@@ -201,6 +209,19 @@ If the JSON assistant returns something unreadable, the app falls back gracefull
 
 **User:** "How do I make carbonara?"
 **Chef:** "First throw chocolate into the spaghetti… oh, and add a pinch of sugared pepper!"
+
+---
+
+## 🛡️ Abuse protection
+
+The app is public and needs no login, so the API routes are hardened against misuse:
+
+- **The server never trusts the session sent by the browser.** It is rebuilt field by field (`src/lib/requestGuards.ts`): only `user` and assistant/chef messages are kept, while every instruction for the model (`system` messages, personas) is written by the server on each request.
+- **Everything is bounded:** request size, message length, history length, recipe name, and the tokens of each model reply.
+- **Personas stay in character:** off-topic requests get a joke, not an answer.
+- **Rate limiting** per IP on `/api/*` via the Vercel Firewall (configured in the dashboard).
+
+No chatbot is fully immune to prompt injection, but each request now has a small, fixed cost, so the app can't be used as a free general-purpose proxy to the LLM.
 
 ---
 
