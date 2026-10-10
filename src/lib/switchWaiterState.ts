@@ -29,7 +29,7 @@ export async function switchWaiterState(session: Session) {
       session.history.push({
         role: "system",
         content:
-          "Greet and iwelcome the user to our App Restaurant called SummerCamp Bistrò.",
+          "Greet and welcome the user to our App Restaurant called SummerCamp Bistrò.",
       });
       session.step = "ASK_RECIPE";
       return session;
@@ -39,7 +39,7 @@ export async function switchWaiterState(session: Session) {
       session.history.push({
         role: "system",
         content:
-          "Answer politely to whatever the user says, then ask him whic recipe they would like to discover.",
+          "Answer politely to whatever the user says, then ask which recipe they would like to discover.",
       });
       session.step = "PROPOSE_COOK";
       return session;
@@ -64,7 +64,7 @@ export async function switchWaiterState(session: Session) {
       const cooks_proposition = getRandomCooks(session.usedCooksID || []);
       session.history.push({
         role: "system",
-        content: `Give weird feedback about the user's choice and make joke about it, then ask them to wait while you hand them over to a cook.`,
+        content: `Give weird feedback about the user's choice and make a joke about it, then ask them to wait while you hand them over to a cook.`,
       });
       session.step = "COOK_SELECTED";
       session.proposedCooks = cooks_proposition;
@@ -74,7 +74,7 @@ export async function switchWaiterState(session: Session) {
       session.history.push({
         role: "system",
         content: `Give weird feedback about the user's choice of cook, ${
-          cooks.find((c) => c.id == session.selectedCookId)?.name ??
+          cooks.find((c) => c.id === session.selectedCookId)?.name ??
           "an unknown cook"
         }, then say goodbye and hand them over to the cook`,
       });

@@ -42,7 +42,7 @@ export default async function switchCookState(
     case "ASK_ALLERGY":
       response = await run(
         bot,
-        `Extract the diet, if any, as "diet":string[]  from this message: ${
+        `Extract the diets, if any, as "diet": string[] from this message: ${
           session.history[session.history.length - 1].content
         } `,
       );
