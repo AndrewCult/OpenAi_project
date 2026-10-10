@@ -11,7 +11,7 @@ You ask a virtual waiter for a recipe. He proposes three chefs; you pick one and
 
 > ⚠️ This is a joke, not a cookbook: recipes and allergen information are intentionally wrong.
 
-![A chef at the SummerCamp Bistrò, avoiding the recipe as usual](docs/screenshot.png)
+![A chef at the SummerCamp Bistrò, avoiding the recipe as usual](docs/chatbot.png)
 
 ---
 
