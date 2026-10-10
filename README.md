@@ -53,7 +53,7 @@ This project is a **creative experiment in human–AI interaction**, balancing f
 
 ### Prerequisites
 
-- **Node.js 18.18 or newer** (20 LTS recommended)
+- **Node.js 20 or newer** (22 LTS recommended)
 - An API key from an OpenAI-compatible provider. The quickest free option is [Groq](https://console.groq.com/keys).
 
 ### 1. Clone the repository
@@ -133,7 +133,7 @@ src/
 │   ├── privacy/page.tsx      # Privacy Policy
 │   ├── terms/page.tsx        # Terms of Service
 │   ├── contact/page.tsx      # Contact page
-│   ├── layout.tsx            # Header, footer, shared stats provider
+│   ├── layout.tsx            # Header, footer, shared stats provider, metadata
 │   ├── opengraph-image.tsx   # Link preview image, rendered at build time
 │   ├── page.tsx              # Home: the chat
 │   └── globals.css
